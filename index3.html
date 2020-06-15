@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react/umd/react.production.min.js" crossorigin></script>
+
+    <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js" crossorigin></script>
+
+    <script src="https://unpkg.com/react-bootstrap@next/dist/react-bootstrap.min.js" crossorigin></script>
+
+    <script>
+        var Alert = ReactBootstrap.Alert;
+        var Container = ReactBootstrap.Container;
+        var Row = ReactBootstrap.Row;
+        var Col = ReactBootstrap.Col;
+        var Button = ReactBootstrap.Button;
+        var Table = ReactBootstrap.Table;
+        var ButtonGroup = ReactBootstrap.ButtonGroup;
+        var Modal = ReactBootstrap.Modal;
+        var Form = ReactBootstrap.Form;
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        let personas = [
+            { id: 1, name: "Franz Wilder", email: "gualambo@gmail.com" },
+            { id: 2, name: "Renzo Gualambo", email: "paul@gmail.com" },
+            { id: 3, name: "Paul Gualambo", email: "renzo@gmail.com" }
+        ];
+
+        class Todo extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    personas : personas,
+                    persona : null,
+                    index : null,
+                    nombres: "",
+                    email: "",
+                    showModal: false,
+                    validated: false,
+                    isInvalidNombres: null,
+                    isInvalidEmail: null,
+                    isValidNombres: null,
+                    isValidEmail: null,
+                    buttonAccion : true // true : guardar, false : editar
+                }
+                this.cerrarModal = this.cerrarModal.bind(this);
+                this.abrirModal = this.abrirModal.bind(this);
+
+                this.cambioNombres = this.cambioNombres.bind(this);
+                this.cambioEmail = this.cambioEmail.bind(this);
+                this.guardarPersona = this.guardarPersona.bind(this);
+                this.editarPersona = this.editarPersona.bind(this);
+                this.eliminarPersona = this.eliminarPersona.bind(this);
+                this.limpiarCampos = this.limpiarCampos.bind(this);
+                this.validNombres = this.validNombres.bind(this);
+                this.validEmail = this.validEmail.bind(this);
+                this.modalAgregar = this.modalAgregar.bind(this);
+                this.modalEditar = this.modalEditar.bind(this);
+
+            }
+            cerrarModal() { this.setState({ showModal: false }); }
+            abrirModal() { this.setState({ showModal: true }); }
+
+            modalAgregar(){
+                this.setState({ persona: null,nombres:"",email:"",buttonAccion:true });
+                this.abrirModal();
+            }
+            modalEditar(persona,index){
+                
+                this.validNombres(persona.name);
+                this.validEmail(persona.email);
+                this.abrirModal();
+                this.setState({ persona: persona,nombres:persona.name,email:persona.email,buttonAccion:false,index:index });
+            }
+
+            cambioNombres(e) {
+                this.validNombres(e.target.value);
+                this.setState({ nombres: e.target.value });
+            }
+            cambioEmail(e) {
+                this.validEmail(e.target.value);
+                this.setState({ email: e.target.value});
+            }
+            guardarPersona(){
+                if(this.state.isValidNombres && this.state.isValidEmail){
+                    let persona = new Object();
+                    persona.id = this.state.personas.length+1;
+                    persona.name = this.state.nombres;
+                    persona.email = this.state.email;
+                    let personas = this.state.personas;
+                    personas.push(persona);
+                    this.setState({personas:personas,showModal:false});
+
+                    this.limpiarCampos();
+                }else{
+                    this.validNombres(this.state.nombres);
+                    this.validEmail(this.state.email);
+                }
+            }
+            editarPersona(){
+                
+               
+                if(this.state.isValidNombres && this.state.isValidEmail){
+                    let persona = new Object();
+                    persona.id = this.state.personas.length+1;
+                    persona.name = this.state.nombres;
+                    persona.email = this.state.email;
+                    let personas = this.state.personas;
+                    personas.splice(this.state.index,1,persona);
+                    this.setState({personas:personas,showModal:false});
+
+                    this.limpiarCampos();
+                }
+                
+            }
+            eliminarPersona(persona,index){
+                let personas = this.state.personas;
+                personas.splice(index,1);
+                this.setState({personas:personas});
+            }
+            validNombres(valor){
+                if (valor.length < 3) {
+                    this.setState({ isInvalidNombres: true, isValidNombres: false });
+                } else {
+                    this.setState({ isInvalidNombres: false, isValidNombres: true });
+                }
+               
+            }
+            validEmail(valor){
+                if (/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(valor)) {
+                    this.setState({ isInvalidEmail: false, isValidEmail: true });
+                } else {
+                    this.setState({ isInvalidEmail: true, isValidEmail: false });
+                }
+            }
+            limpiarCampos(){
+                this.setState({ isInvalidEmail: false, isValidEmail: false,isInvalidNombres: false, isValidNombres: false });
+                this.setState({ nombres:"",email:"" });
+            }
+
+
+            render() {
+                
+                return <Container>
+                    <Row>
+                        <Col>
+                            <h1>Personas</h1>
+                            <Button variant="outline-warning" onClick={this.modalAgregar}>+Persona</Button>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>NOMBRE</th>
+                                    <th>EMAIL</th>
+                                    <th>ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.personas.map((persona,index) => <tr>
+                                    <td>{persona.id}</td>
+                                    <td>{persona.name}</td>
+                                    <td>{persona.email}</td>
+                                    <td>
+                                        <ButtonGroup>
+                                            <Button variant="outline-info" onClick={()=>this.modalEditar(persona,index)}>Editar</Button>
+                                            <Button variant="outline-danger" onClick={()=>this.eliminarPersona(persona,index)}>Eliminar</Button>
+                                        </ButtonGroup>
+                                    </td>
+                                </tr>)}
+                            </tbody>
+                        </Table>
+                    </Row>
+                    <Modal show={this.state.showModal} onHide={this.cerrarModal}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Persona</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form noValidate>
+                                <Form.Control onChange={this.cambioNombres} isValid={this.state.isValidNombres} isInvalid={this.state.isInvalidNombres} value={this.state.nombres} type="text" placeholder="Ingrese Nombres" required />
+                                <br />
+                                <Form.Control onChange={this.cambioEmail} isValid={this.state.isValidEmail} isInvalid={this.state.isInvalidEmail} value={this.state.email} type="email" placeholder="Ingrese Email" required />
+                                <br />
+                                <ButtonGroup>
+                                    <Button variant="outline-danger" onClick={this.cerrarModal}>
+                                        Cerrar
+                                    </Button>
+                                    
+                                   {this.state.buttonAccion?<Button variant="outline-success" type="button" onClick={this.guardarPersona}>
+                                        Guardar
+                                    </Button>:<Button variant="outline-success" type="button" onClick={this.editarPersona}>
+                                        Editar
+                                    </Button>}
+                                </ButtonGroup>
+                            </Form>
+                        </Modal.Body>
+
+                    </Modal>
+                </Container>
+                    ;
+            }
+        }
+        ReactDOM.render(
+            <Todo />
+            ,
+            document.getElementById('root')
+        );
+
+    </script>
+</body>
+
+</html>

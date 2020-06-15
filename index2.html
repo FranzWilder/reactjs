@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>React JS</title>
+    <script src="react.development.js"></script>
+    <script src="react-dom.development.js"></script>
+
+    <script src="babel.min.js"></script>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+       
+
+        class MiForm extends React.Component{
+            constructor(props) {
+                super(props);
+                
+
+            }
+
+            render(){
+                return <div>
+                    <h1>{this.props.titulo}</h1>
+                    Nombres : <input type="text" value={this.props.valorNombres} onChange={this.props.campoNombre} /> <br />
+                    Edad : <input type="text" value={this.props.valorEdad} onChange={this.props.campoEdad} /> <br />
+                    {this.props.button}
+                </div>
+            }
+        }
+
+        axios({
+            method:"GET",
+            url : "https://jsonplaceholder.typicode.com/users",
+            
+        }).then(function(response){
+            
+            var alumnos = [];
+            var alumno = new Object();
+
+            for(var ind in response.data){
+                alumno =  new Object();
+                alumno.id = response.data[ind].id;
+                alumno.nombres = response.data[ind].name;
+                alumno.edad = response.data[ind].email;
+                alumnos.push(alumno);
+            }
+            
+            class Modulo extends React.Component {
+                constructor(props) {
+                    super(props);
+                
+
+                    this.state = {
+                        alumnos: alumnos,
+                        nombres: "",
+                        edad: "",
+                        index:0,
+                        alumno:null,
+                        editar:0
+                    }
+                    
+                    this.agregarAlumno = this.agregarAlumno.bind(this);
+                    this.botonEditar = this.botonEditar.bind(this);
+                    this.botonEliminar = this.botonEliminar.bind(this);
+                    this.editarAlumno = this.editarAlumno.bind(this);
+                }
+                agregarAlumno() {
+                    var alumno = new Object();
+                    alumno.id = this.state.alumnos.length + 1;
+                    alumno.nombres = this.state.nombres;
+                    alumno.edad = this.state.edad;
+
+                    var alumnos = this.state.alumnos;
+                    alumnos.push(alumno);
+                    this.setState({ alumnos: alumnos, nombres: "", edad: "" });
+                }
+
+                botonEliminar(index) {
+                    let alumnos = this.state.alumnos;
+                    alumnos.splice(index, 1);
+
+                    this.setState({ alumnos: alumnos });
+                }
+                botonEditar(alumno,index) {
+                    this.setState({ nombres: alumno.nombres, edad: alumno.edad,index:index,alumno:alumno,editar:1 });
+                }
+
+                editarAlumno(){
+                
+                    var newAlumno = new Object();
+                    var alumno = this.state.alumno;
+
+                    newAlumno.id = alumno.id;
+                    newAlumno.nombres = this.state.nombres;
+                    newAlumno.edad = this.state.edad;
+                    
+                    let alumnos = this.state.alumnos;
+                    alumnos.splice(this.state.index, 1,newAlumno);
+                    this.setState({ alumnos: alumnos, nombres: "", edad: "",editar:0  });
+                }
+
+
+                render() {
+                    let button = ""
+                    if (this.state.editar == 0) {
+                        button = <button type="button" onClick={this.agregarAlumno}>+ Agregar</button>;
+                    } else {
+                        button = <button type="button" onClick={()=>this.editarAlumno()}>Editar</button>;
+                    }
+
+                    return <div>
+                    <MiForm 
+                        campoNombre={(e) => this.setState({ nombres: e.target.value })} 
+                        campoEdad={(e) => this.setState({ edad: e.target.value })} 
+                        valorNombres={this.state.nombres} 
+                        valorEdad={this.state.edad} 
+                        button={button}
+                    />
+                    
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>NOMBRE</th>
+                                    <th>EDAD</th>
+                                    <th>ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.alumnos.map((alumno, index) => <tr key={alumno.id}><td>{alumno.id}</td><td>{alumno.nombres}</td><td>{alumno.edad}</td><td><input type="button" value="editar" onClick={() => this.botonEditar(alumno,index)} /><input type="button" value="eliminar" onClick={() => this.botonEliminar(index)} /></td></tr>)}
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+
+
+            ReactDOM.render(
+                <Modulo titulo="Alumnos" />,
+                document.getElementById('root')
+            );
+        });
+
+
+    </script>
+</body>
+
+</html>

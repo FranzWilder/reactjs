@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>React JS</title>
+    
+</head>
+
+<body>
+    <div id="root"></div>
+    
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+ 
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        class MiForm extends React.Component{
+            constructor(props){
+                super(props);
+                this.state = {
+                    frutas : this.props.frutas,
+                    value : "",
+                    agregarFrutas : this.props.agregarFrutas
+                }
+                this.cambio = this.cambio.bind(this);
+                this.agregar = this.agregar.bind(this);
+            }
+
+            cambio (event){
+                this.setState({
+                    value:event.target.value
+                });
+            }
+            agregar(){
+                let frutas = this.state.frutas;
+                frutas.push(this.state.value);
+                this.setState({frutas : frutas});
+                this.state.agregarFrutas(this.state.frutas);
+            }
+
+            render(){
+                return <div>
+                    Frutas : <input frutas={this.props.frutas} name="campo" value={this.state.value} onChange={this.cambio} />
+                    <button onClick={this.agregar}>Agregar</button>
+                </div>
+            }
+        }
+        class Item extends React.Component{
+            constructor(props){
+                super(props);
+                this.borrarItem = this.borrarItem.bind(this);
+                this.editarItem = this.editarItem.bind(this);
+            }   
+            borrarItem(index){
+                var frutas = this.props.frutas;
+                frutas.splice(index,1);
+                this.props.borrarFruta(frutas);
+            }
+            editarItem(index){
+                this.props.elegirId(index);
+            }
+
+
+            render(){
+                return <>
+                <li>
+                    <span>{this.props.fruta}</span> 
+                    <input onClick={() => this.borrarItem(this.props.miId)} type="button" value="borrar" /><input type="button" value="Editar" onClick={() => this.editarItem(this.props.miId )} />
+                </li>
+                </>
+            }  
+        }
+        class Lista extends React.Component{
+            constructor(props){
+                super(props); 
+            }
+
+            render(){
+                return <ul>
+                    {this.props.frutas.map((fruta,index)=><Item key={index} fruta={fruta} borrarFruta={this.props.borrarFruta} miId={index} elegirId={this.props.elegirId}/>)}
+                </ul>
+            }
+        }
+       
+        class Modulo extends React.Component{
+            constructor(props){
+                super(props);
+                this.state = {
+                   frutas : ["Pera","Manzana","Piña"],
+                   value : "",
+                   valueEditar:"",
+                   idEditar:""
+                }   
+                this.updateFrutas = this.updateFrutas.bind(this);
+                this.cambio = this.cambio.bind(this);
+                this.editarFruta = this.editarFruta.bind(this);
+                this.elegirId = this.elegirId.bind(this);
+            }
+            cambio(event){
+                this.setState({valueEditar:event.target.value});
+            }
+            editarFruta(){
+                var frutas = this.state.frutas;
+                frutas.splice(this.state.idEditar, 1, this.state.valueEditar);
+
+                this.updateFrutas(frutas);
+            }
+            elegirId(index){
+                this.setState({idEditar:index});
+            }
+
+            updateFrutas(frutas){ this.setState({frutas : frutas}) }
+
+            render(){
+                return <div>
+                    
+                    <br/>
+                    <MiForm frutas={this.state.frutas} agregarFrutas={this.updateFrutas} />
+                    <input onChange={this.cambio} value={this.state.valueEditar} type="text"  /><input type="button" value="Editar" onClick={this.editarFruta}/>
+                    <Lista frutas={this.state.frutas} borrarFruta={this.updateFrutas} elegirId={this.elegirId}/>
+                    
+                </div>;
+            }
+        }
+
+        const etiqueta = <div>
+            <Modulo />
+        </div>
+        ReactDOM.render(
+            etiqueta,
+            document.getElementById('root')
+        );
+
+    </script>
+</body>
+
+</html>
